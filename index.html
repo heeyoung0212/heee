@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>색 빨리 채우기 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .cell.filled {
+            background-color: #ff4d4d;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .game-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>색 빨리 채우기 게임</h1>
+        <button id="startButton">게임 시작</button>
+        <div id="gameInfo" class="game-info" style="display: none;">
+            <p>점수: <span id="score">0</span></p>
+            <p>남은 시간: <span id="timeLeft">15</span>초</p>
+        </div>
+        <div id="grid" class="grid"></div>
+    </div>
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <h2>게임 종료!</h2>
+            <p>최종 점수: <span id="finalScore"></span></p>
+            <button id="restartButton">다시 시작</button>
+        </div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const gameInfo = document.getElementById('gameInfo');
+        const scoreElement = document.getElementById('score');
+        const timeLeftElement = document.getElementById('timeLeft');
+        const gridElement = document.getElementById('grid');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const finalScoreElement = document.getElementById('finalScore');
+        const restartButton = document.getElementById('restartButton');
+
+        let score = 0;
+        let timeLeft = 15;
+        let gameInterval;
+        let cells = [];
+        let isGameActive = false;
+
+        function createGrid() {
+            gridElement.innerHTML = '';
+            cells = [];
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.addEventListener('click', () => fillCell(i));
+                gridElement.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        function fillCell(index) {
+            if (isGameActive && !cells[index].classList.contains('filled')) {
+                cells[index].classList.add('filled');
+                score++;
+                scoreElement.textContent = score;
+                if (cells.every(cell => cell.classList.contains('filled'))) {
+                    endGame();
+                }
+            }
+        }
+
+        function startGame() {
+            isGameActive = true;
+            score = 0;
+            timeLeft = 15;
+            scoreElement.textContent = score;
+            timeLeftElement.textContent = timeLeft;
+            startButton.style.display = 'none';
+            gameInfo.style.display = 'block';
+            createGrid();
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timeLeftElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            isGameActive = false;
+            clearInterval(gameInterval);
+            finalScoreElement.textContent = score;
+            gameOverModal.style.display = 'block';
+        }
+
+        function restartGame() {
+            gameOverModal.style.display = 'none';
+            startGame();
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+
+        // 초기 그리드 생성
+        createGrid();
+    </script>
+</body>
+</html>
